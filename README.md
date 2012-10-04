@@ -1,0 +1,2 @@
+awsmang monitors awsboxen
+
