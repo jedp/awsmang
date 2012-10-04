@@ -1,0 +1,24 @@
+!!!5
+html
+  head
+    title AWSMANG
+
+    link(rel='stylesheet', href='/css/style.css')
+    script(src='/js/head.min.js')
+
+  body
+
+    #content
+      != body
+
+    script
+      head.js(
+        {jquery:        "/js/jquery.min.js"},
+        {underscore:    "/js/underscore-min.js"},
+        {backbone:      "/js/backbone-min.js"},
+        {socket_io:     "/socket.io/socket.io.js"},
+        {app:           "/js/client.js"}
+      );
+
+      head.ready(function() {
+      });

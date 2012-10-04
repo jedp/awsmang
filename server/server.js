@@ -13,6 +13,7 @@ var app = module.exports = express.createServer();
 
 app.configure(function(){
   app.set('view engine', 'jade');
+  app.set('views', __dirname + '/views');
   app.use(express.bodyParser());
   app.use(express.methodOverride());
   app.use(app.router);
@@ -55,18 +56,18 @@ app.put('/:address', function(req, res) {
   var address = sanitizeAddress(req.params.address);
   if (address) {
     awsmang.startMonitoring(address);
-    return res.end(200);
+    return res.send(200);
   }
-  return res.end(500);
+  return res.send(500);
 });
 
 app.delete('/:address', function(req, res) {
   var address = sanitizeAddress(req.params.address);
   if (address) {
     awsmang.stopMonitoring(address);
-    return res.end(200);
+    return res.send(200);
   }
-  return res.end(500);
+  return res.send(500);
 });
 
 app.get('/status/:address?', function(req, res) {

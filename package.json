@@ -21,7 +21,7 @@
     },
 
     "scripts": {
-        "start": "node lib/server.js",
+        "start": "node server/server.js",
         "test": "vows test/*_vows.js --spec"
     },
 
