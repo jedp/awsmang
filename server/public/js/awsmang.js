@@ -2,16 +2,17 @@ _.templateSettings = {
   interpolate: /\{\{(.+?)\}\}/g
 };
 
-var History = Backbone.Model.extend({});
-var Server = Backbone.Model.extend({});
-var Dashboard = Backbone.Model.extend({
+
+var Server = Backbone.Model.extend({
   defaults: {
-    serverViews: {}
+    address: "---",
+    statusCode: "---",
+    date: "0",
+    time: "---"
   }
 });
 
-var HistoryView = Backbone.View.extend({
-});
+var Dashboard = Backbone.Model.extend({});
 
 var ServerView = Backbone.View.extend({
   model: Server,
@@ -23,11 +24,20 @@ var ServerView = Backbone.View.extend({
   className: 'serverView',
 
   initialize: function() {
+    this._statuses = {};
+
+    _.bindAll(this, 'update', 'render');
     return this;
+  },
+
+  update: function(status) {
+    this.model.set(status.data);
+    this.render();
   },
 
   render: function() {
     $(this.el).html(this.template(this.model.toJSON()));
+    return this;
   },
 });
 
@@ -37,35 +47,56 @@ var ServerView = Backbone.View.extend({
 var DashboardView = Backbone.View.extend({
   model: Dashboard,
 
-  el: $('#dashboard'),
-
-  addServer: function(name) {
-    if (! this.model.serverViews[name]) {
-      console.log("add server: " + name);
-      var server = new Server(name);
-      this.model.serverViews[name] = new ServerView({model: server});
-    }
-  },
+  el: $('#servers'),
 
   initialize: function() {
+    var self = this;
+    this._serverViews = {};
     this.socket = io.connect();
 
     this.socket.on('connect', function() {
       // yay
     });
     this.socket.on('update', function(message) {
-      console.log(message);
-      // status data from a server
+      self.updateServer(message);
     });
     this.socket.on('addServer', function(message) {
-      // add a server to the list
+      self.addServer(message);
     });
     this.socket.on('removeServer', function(message) {
-      // remove a server from the list
+      self.removeServer(message);
     });
 
     _.bindAll(this, 'render');
     return this;
+  },
+
+  addServer: function(data) {
+    console.log("add server: " + data.address);
+    if (! this._serverViews[data.address]) {
+      var server = new Server({address: data.address});
+      var serverView = new ServerView({model: server});
+      this._serverViews[data.address] = serverView;
+      $(this.el).append(serverView.render().el);
+    }
+    return this;
+  },
+
+  removeServer: function(data) {
+    console.log("remove " + data.address);
+    this._serverViews[data.address].remove();
+    delete this._serverViews[data.address];
+  },
+
+  updateServer: function(data) {
+    var address = data.address;
+    if (address) {
+      if (!this._serverViews[address]) {
+        this.addServer(data);
+      } else {
+        this._serverViews[address].update(data);
+      }
+    }
   },
 
   render: function() {

@@ -38,18 +38,21 @@ io.set('log level', 1);
 io.sockets.on('connection', function(socket) {
   // When a socket connects, send it the lastest status for each server
   awsmang.getStatuses(100, function(err, statuses) {
-    Object.keys(statuses).forEach(function(status) {
-      console.log("status!", status);
-      socket.volatile.emit('addServer', status);
+    Object.keys(statuses).forEach(function(address) {
+      socket.volatile.emit('addServer', {address: address, statuses: statuses[address]});
     });
   });
 });
 
-
 awsmang.on('update', function(message) {
   io.sockets.emit('update', message);
 });
-
+awsmang.on('removeServer', function(message) {
+  io.sockets.emit('removeServer', message);
+});
+awsmang.on('addServer', function(message) {
+  io.sockets.emit('addServer', message);
+});
 /*
  * There's only one view, and it shows you the monitor
  */

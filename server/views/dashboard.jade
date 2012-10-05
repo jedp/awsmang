@@ -1,7 +1,10 @@
 #server-view-template(style="display: none")
-  div {{ address }}
+  div {{ address }} {{ date }} {{ statusCode }} {{ time }}
 
 #dashboard
+  h2 Dashboard
+
+  #servers
 
 script
   head.ready(function() {
