@@ -3,21 +3,21 @@
 
 const
 express = require('express'),
-path = require('path'),
-io = require('socket.io'),
+socket_io = require('socket.io'),
 awsmang = require('../lib/awsmang');
 
+/*
+ * express app configuration
+ */
+
 var app = module.exports = express.createServer();
-
-// Configuration
-
 app.configure(function(){
   app.set('view engine', 'jade');
   app.set('views', __dirname + '/views');
   app.use(express.bodyParser());
   app.use(express.methodOverride());
   app.use(app.router);
-  app.use(express.static(path.join(__dirname, 'static')));
+  app.use(express.static(__dirname + '/public'));
 });
 
 app.configure('development', function(){
@@ -26,6 +26,28 @@ app.configure('development', function(){
 
 app.configure('production', function(){
   app.use(express.errorHandler());
+});
+
+/*
+ * socket.io config
+ */
+
+var io = module.exports.io = socket_io.listen(app);
+io.set('log level', 1);
+
+io.sockets.on('connection', function(socket) {
+  // When a socket connects, send it the lastest status for each server
+  awsmang.getStatuses(100, function(err, statuses) {
+    Object.keys(statuses).forEach(function(status) {
+      console.log("status!", status);
+      socket.volatile.emit('addServer', status);
+    });
+  });
+});
+
+
+awsmang.on('update', function(message) {
+  io.sockets.emit('update', message);
 });
 
 /*

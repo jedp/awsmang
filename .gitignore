@@ -1,11 +1,12 @@
 # turd files
-*.un~
+*~
 *.swp
 *.swo
 .DS_Store?
 
 # locally installed node modules
 node_modules
+npm-debug.log
 .gitmodules
 
 # awsbox setup notes
