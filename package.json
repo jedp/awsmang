@@ -16,13 +16,14 @@
     },
 
     "devDependencies": {
+        "awsmang-connect": "*",
         "vows": "0.6.4",
         "awsbox": "0.2.17"
     },
 
     "scripts": {
         "start": "node server/server.js",
-        "test": "vows test/*_vows.js --spec"
+        "test": "vows test/test*.js --spec"
     },
 
     "engines": {
