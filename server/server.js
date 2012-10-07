@@ -4,13 +4,11 @@
 const
 express = require('express'),
 socket_io = require('socket.io'),
-awsmang = require('../lib/awsmang');
-
-/*
- * express app configuration
- */
+logger = new (require('../lib/logger')),
+awsmang = new (require('../lib/awsmang'));
 
 var app = module.exports = express.createServer();
+
 app.configure(function(){
   app.set('view engine', 'jade');
   app.set('views', __dirname + '/views');
@@ -108,5 +106,5 @@ app.get('/status/:address?', function(req, res) {
 
 if (!module.parent) {
   app.listen(process.env.PORT || 3000);
-  console.log("Listening on port %d in %s mode", app.address().port, app.settings.env);
+  logger.info("Awsmang listening on port " + app.address().port);
 }
