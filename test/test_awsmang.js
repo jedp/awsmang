@@ -1,8 +1,10 @@
 const
 vows = require('vows'),
 assert = require('assert'),
+redis = require('redis'),
 express = require('express'),
-Awsmang = require('../lib/awsmang');
+Awsmang = require('../lib/awsmang'),
+NS = 'test_awsmang';
 
 // some variables will be created and modified by the test batches below
 var port, server, mang;
@@ -39,7 +41,7 @@ vows.describe("awsmang")
       var cb = this.callback;
       mang = new Awsmang({
         check_interval: 1,
-        redis_namespace: 'test_awsmang'
+        redis_namespace: NS
       });
       mang.on('addServer', function(message) {
         return cb(null, message);
@@ -83,6 +85,35 @@ vows.describe("awsmang")
       assert(message.address === 'http://localhost:'+port);
     }
 
+  }
+})
+
+.addBatch({
+  "Clean up db": {
+    topic: function() {
+      var cb = this.callback;
+      var deleted = 0;
+      var client = redis.createClient();
+      client.keys(NS+'*', function(err, keys) {
+        var numKeys = keys.length;
+        keys.forEach(function(key) {
+          client.del(key, function(err, result) {
+            if (err) {
+              return cb(err);
+            }
+            deleted += 1;
+            if (deleted === numKeys) {
+              return cb(null, numKeys);
+            }
+          });
+        });
+      });
+    },
+
+    "ok": function(err, removed) {
+      assert(!err);
+      assert(removed);
+    }
   }
 })
 
